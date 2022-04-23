@@ -5,7 +5,6 @@
       <div class="title-container">
         <h3 class="title">Login Form</h3>
       </div>
-
       <el-form-item prop="username">
         <span class="svg-container">
           <svg-icon icon-class="user" />
@@ -107,8 +106,10 @@ export default {
     },
     handleLogin() {
       this.$refs.loginForm.validate(valid => {
+        // 如果表单验证成功
         if (valid) {
           this.loading = true
+          // 派发action
           this.$store.dispatch('user/login', this.loginForm).then(() => {
             this.$router.push({ path: this.redirect || '/' })
             this.loading = false
