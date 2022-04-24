@@ -25,7 +25,7 @@ export default {
   data() {
     return {
       title: '后台管理系统',
-      logo: 'https://wpimg.wallstcn.com/69a1c46c-eb1c-4b46-8bd4-e9e686ef5251.png'
+      logo: require('@/assets/16438970691759a2af3768bac9b8ef3bb11478cbd15509f97.jpg')
     }
   }
 }

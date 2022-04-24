@@ -6,7 +6,7 @@
 
 <script>
 export default {
-  name: "Sku"
+  name: 'Sku'
 }
 </script>
 

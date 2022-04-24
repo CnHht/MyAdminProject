@@ -57,34 +57,34 @@ export const constantRoutes = [
   {
     path: '/product',
     component: Layout,
-    name:'Product',
+    name: 'Product',
     children: [
       {
         path: 'trademark',
         name: 'Trademark',
-        component:() => import('@/views/product/tradeMark'),
-        meta: { title: '品牌管理' , icon: 'el-icon-s-release'}
+        component: () => import('@/views/product/tradeMark'),
+        meta: { title: '品牌管理', icon: 'el-icon-s-release' }
       },
       {
         path: 'attr',
         name: 'Attr',
-        component:() => import('@/views/product/Attr'),
-        meta: { title: '属性管理' , icon: 'el-icon-s-tools'}
+        component: () => import('@/views/product/Attr'),
+        meta: { title: '属性管理', icon: 'el-icon-s-tools' }
       },
       {
         path: 'sku',
         name: 'Sku',
-        component:() => import('@/views/product/Sku'),
-        meta: { title: 'sku管理' , icon: 'el-icon-shopping-bag-1'}
+        component: () => import('@/views/product/Sku'),
+        meta: { title: 'sku管理', icon: 'el-icon-shopping-bag-1' }
       },
       {
         path: 'spu',
         name: 'Spu',
-        component:() => import('@/views/product/Spu'),
-        meta: { title: 'spu管理' , icon: 'el-icon-shopping-bag-2'}
-      },
+        component: () => import('@/views/product/Spu'),
+        meta: { title: 'spu管理', icon: 'el-icon-shopping-bag-2' }
+      }
     ],
-    meta:{ title:'商品管理' , icon: 'el-icon-goods'}
+    meta: { title: '商品管理', icon: 'el-icon-goods' }
   },
 
   {

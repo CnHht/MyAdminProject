@@ -6,7 +6,7 @@
 
 <script>
 export default {
-  name: "Attr"
+  name: 'Attr'
 }
 </script>
 

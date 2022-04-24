@@ -1,5 +1,5 @@
 import request from '@/utils/request'
-//对外暴露登录的接口
+// 对外暴露登录的接口
 export function login(data) {
   return request({
     url: '/admin/acl/index/login',
@@ -7,7 +7,7 @@ export function login(data) {
     data
   })
 }
-//对外暴露获得用户信息的接口
+// 对外暴露获得用户信息的接口
 export function getInfo(token) {
   return request({
     url: '/admin/acl/index/info',
