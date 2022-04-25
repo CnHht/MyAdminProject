@@ -36,7 +36,7 @@
                 type="warning"
                 round
                 icon="el-icon-edit"
-                @click="AddAttr"
+                @click="updateAttr(row)"
               >
               </el-button>
               <el-button
@@ -51,18 +51,20 @@
         </el-table>
       </div>
       <div v-show="!isShowTable">
-        <el-form :inline="true" ref="form" label-width="80px" >
+        <el-form :inline="true" ref="form" label-width="80px" :model="attrInfo">
           <el-form-item label="属性名" style="margin: 10px">
-            <el-input placeholder="请输入属性名"></el-input>
+            <el-input placeholder="请输入属性名" v-model="attrInfo.attrName"></el-input>
           </el-form-item>
         </el-form>
-        <el-button type="primary" icon="el-icon-plus" style="margin-left: 10px">
+        <el-button type="primary" icon="el-icon-plus" style="margin-left: 10px" @click="addAttrValue"
+        :disabled="!attrInfo.attrName"
+        >
           添加属性值
         </el-button>
-        <el-button >
+        <el-button @click="cancelAttrValue" :disabled="!attrInfo.attrName">
           取消
         </el-button>
-        <el-table style="width: 100%;margin: 10px" border="true">
+        <el-table style="width: 100%;margin: 10px" border="true" :data="attrInfo.attrValueList">
             <el-table-column
               label="序号"
               align="center"
@@ -74,18 +76,26 @@
             <el-table-column
               label="属性值名称"
             >
-
+            <template slot-scope="{row,$index}">
+                <el-input placeholder="请输入属性值名称" v-model="row.valueName" size="mini"></el-input>
+            </template>
             </el-table-column>
             <el-table-column
               label="操作"
             >
-
+              <template slot-scope="{row,$index}">
+                <el-button
+                  size="mini"
+                  type="danger"
+                  round
+                  icon="el-icon-delete"></el-button>
+              </template>
             </el-table-column>
         </el-table >
         <el-button type="primary" style="margin-left: 10px">
           保存
         </el-button>
-        <el-button >
+        <el-button @click="cancelAdd">
           取消
         </el-button>
       </div>
@@ -94,6 +104,7 @@
 </template>
 
 <script>
+import cloneDeep from 'lodash/cloneDeep'
 export default {
   name: 'Attr',
   data() {
@@ -102,7 +113,15 @@ export default {
       category2Id: '',
       category3Id: '',
       AttrList: [],
-      isShowTable:false
+      isShowTable:true,
+      attrInfo:{
+        "attrName": "",
+        "attrValueList": [
+
+        ],
+        "categoryId": 0,
+        "categoryLevel": 3,
+      },
     }
   },
   methods: {
@@ -137,6 +156,33 @@ export default {
     },
     AddAttr(){
       this.isShowTable = !this.isShowTable
+      this.attrInfo = {
+        "attrName": "",
+        "attrValueList": [
+
+        ],
+        "categoryId": this.category3Id,
+        "categoryLevel": 3,
+      }
+    },
+    addAttrValue(){
+      this.attrInfo.attrValueList.push({
+        attrId: undefined,
+        valueName:''
+      })
+    },
+    cancelAdd(){
+      this.isShowTable = !this.isShowTable
+    },
+    cancelAttrValue(){
+      this.attrInfo.attrName = ""
+    },
+    updateAttr(row){
+      this.isShowTable = !this.isShowTable
+      //将选中的属性赋值给attrInfo
+      //由于数据结构当中存在对象里面套数组，数组里面有套对象，因此需要使用深拷贝解决这类问题
+      //深拷贝，浅拷贝在面试的时候出现频率很高，切记达到手写深拷贝与浅拷贝
+      this.attrInfo = cloneDeep(row)
     }
 
   }
