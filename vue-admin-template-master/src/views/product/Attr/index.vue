@@ -1,7 +1,7 @@
 <template>
   <div>
     <el-card class="box-card" style="margin-bottom: 30px">
-      <CategorySelect @getCateGoryId="getCateGoryId"></CategorySelect>
+      <CategorySelect @getCateGoryId="getCateGoryId" :show="!isShowTable"></CategorySelect>
     </el-card>
     <el-card class="box-card">
       <div v-show="isShowTable">
@@ -57,14 +57,14 @@
           </el-form-item>
         </el-form>
         <el-button type="primary" icon="el-icon-plus" style="margin-left: 10px" @click="addAttrValue"
-        :disabled="!attrInfo.attrName"
+        :disabled="!attrInfo.attrName || NoAdd"
         >
           添加属性值
         </el-button>
         <el-button @click="cancelAttrValue" :disabled="!attrInfo.attrName">
           取消
         </el-button>
-        <el-table style="width: 100%;margin: 10px" border="true" :data="attrInfo.attrValueList">
+        <el-table style="width: 100%;margin: 10px" border :data="attrInfo.attrValueList">
             <el-table-column
               label="序号"
               align="center"
@@ -77,22 +77,37 @@
               label="属性值名称"
             >
             <template slot-scope="{row,$index}">
-                <el-input placeholder="请输入属性值名称" v-model="row.valueName" size="mini"></el-input>
+                <el-input  laceholder="请输入属性值名称"
+                           v-model="row.valueName"
+                           @blur="toLook(row)"
+                           v-if="row.flag"
+                           @keyup.enter.native="toLook(row)"
+                           :ref="$index"
+                ></el-input>
+                      <!--  style="display: block"将span变成块元素，否则span为空时会有bug              -->
+                <span v-else @click="toEdit(row,$index)" style="display: block" >{{row.valueName}}</span>
             </template>
             </el-table-column>
             <el-table-column
               label="操作"
             >
               <template slot-scope="{row,$index}">
-                <el-button
-                  size="mini"
-                  type="danger"
-                  round
-                  icon="el-icon-delete"></el-button>
+                <el-popconfirm
+                  :title="`确定删除${row.valueName}?`" @onConfirm="delAttrValue($index)">
+                  <el-button
+                    size="mini"
+                    type="danger"
+                    round
+                    icon="el-icon-delete"
+                    slot="reference"
+
+                  ></el-button>
+              </el-popconfirm>
+
               </template>
             </el-table-column>
         </el-table >
-        <el-button type="primary" style="margin-left: 10px">
+        <el-button type="primary" style="margin-left: 10px" @click="addOrUpdateAttrInfo" :disabled="attrInfo.attrValueList.length < 1">
           保存
         </el-button>
         <el-button @click="cancelAdd">
@@ -122,6 +137,7 @@ export default {
         "categoryId": 0,
         "categoryLevel": 3,
       },
+      NoAdd:false
     }
   },
   methods: {
@@ -164,25 +180,98 @@ export default {
         "categoryId": this.category3Id,
         "categoryLevel": 3,
       }
+
     },
     addAttrValue(){
       this.attrInfo.attrValueList.push({
-        attrId: undefined,
+        flag:true,
+        attrId: this.attrInfo.id,
         valueName:''
       })
+      this.$nextTick(()=>{
+        this.$refs[this.attrInfo.attrValueList.length - 1].focus();
+      })
+
     },
     cancelAdd(){
       this.isShowTable = !this.isShowTable
     },
     cancelAttrValue(){
       this.attrInfo.attrName = ""
+      this.attrInfo = {}
     },
     updateAttr(row){
       this.isShowTable = !this.isShowTable
+
       //将选中的属性赋值给attrInfo
       //由于数据结构当中存在对象里面套数组，数组里面有套对象，因此需要使用深拷贝解决这类问题
       //深拷贝，浅拷贝在面试的时候出现频率很高，切记达到手写深拷贝与浅拷贝
       this.attrInfo = cloneDeep(row)
+      this.attrInfo.attrValueList.forEach(item => {
+        //这样写的话数据不是响应式数据
+        //  item.flag = false
+        this.$set(item,'flag',false)
+      })
+    },
+    toLook(row){
+      if(row.valueName.trim() == ''){
+          this.NoAdd = true
+          this.$message({
+            message:'属性值不能为空',
+            type:"error",
+          })
+        return
+      }
+      let isRepat = this.attrInfo.attrValueList.some(item=>{
+        //需要将row从数组里面判断的时候去除
+        //row最新新增的属性值【数组的最后一项元素】
+        //判断的时候，需要把已有的数组当中新增的这个属性值去除
+        if(row!==item){
+          return row.valueName==item.valueName;
+        }
+      });
+      if(isRepat) {
+        this.$message({
+          message:'属性值不能相同',
+          type:"error",
+        })
+        return;
+      }
+      row.flag = false
+      this.NoAdd = false
+    },
+    toEdit(row,$index){
+      row.flag = true
+      this.$nextTick(()=>{
+        this.$refs[$index].focus()
+      })
+    },
+    delAttrValue($index){
+        this.attrInfo.attrValueList.splice($index,1)
+    },
+    //添加或者修改属性的操作
+    async addOrUpdateAttrInfo(){
+      this.attrInfo.attrValueList = this.attrInfo.attrValueList.filter(item => {
+          if(item.valName != ''){
+             delete item.flag
+            return true
+          }
+        })
+     try {
+       await this.$API.attr.reqAddOrUpdateAttrInfo(this.attrInfo)
+       this.isShowTable = true
+       this.$message({
+         message:'保存成功！',
+         type:"success"
+       })
+        this.getAttrList()
+     }catch (e) {
+       this.$message({
+         message:'保存失败！',
+         type:"error"
+       })
+     }
+
     }
 
   }
