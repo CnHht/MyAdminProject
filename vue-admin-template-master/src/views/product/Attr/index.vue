@@ -5,7 +5,7 @@
     </el-card>
     <el-card class="box-card">
       <div v-show="isShowTable">
-        <el-button type="primary" icon="el-icon-plus" style="margin: 30px" @click="AddAttr" :disabled="!category3Id">添加</el-button>
+        <el-button type="primary" icon="el-icon-plus" style="margin-bottom: 30px" @click="AddAttr" :disabled="!category3Id">添加</el-button>
         <el-table style="width: 100%" border :data="AttrList">
           <el-table-column
             align="center"
@@ -52,7 +52,7 @@
       </div>
       <div v-show="!isShowTable">
         <el-form :inline="true" ref="form" label-width="80px" :model="attrInfo">
-          <el-form-item label="属性名" style="margin: 10px">
+          <el-form-item label="属性名" style="margin-bottom: 10px">
             <el-input placeholder="请输入属性名" v-model="attrInfo.attrName"></el-input>
           </el-form-item>
         </el-form>
