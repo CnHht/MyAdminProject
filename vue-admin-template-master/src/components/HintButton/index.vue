@@ -7,10 +7,10 @@
 <script>
 export default {
   name: "HintButton",
-  props:['title']
+  props: ['title']
 }
 </script>
 
-<style >
+<style>
 
 </style>

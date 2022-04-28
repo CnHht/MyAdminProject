@@ -7,7 +7,7 @@
       <!--    外层的v-model是到哪里收集的数据 内层的:value是收集数据的对象    -->
       <el-form-item label="品牌">
         <el-select placeholder="请选择品牌" v-model="SpuData.tmId">
-          <el-option v-for="(tm,index) in TradeMarkList" :key="tm.id" :label="tm.tmName" :value="tm.id" value=""></el-option>
+          <el-option v-for="(tm,index) in TradeMarkList" :key="tm.id" :label="tm.tmName" :value="tm.id"></el-option>
         </el-select>
       </el-form-item>
       <el-form-item label="SPU描述">
@@ -35,13 +35,15 @@
       </el-form-item>
       <el-form-item label="销售属性">
         <el-select :placeholder="`还有${unSelectSaleAttr.length}项未选择`" v-model="SelectAttr">
-          <el-option v-for="(us,index) in unSelectSaleAttr" :key="us.id" :label="us.name" :value="`${us.id}:${us.name}`"></el-option>
+          <el-option v-for="(us,index) in unSelectSaleAttr" :key="us.id" :label="us.name"
+                     :value="`${us.id}:${us.name}`"></el-option>
         </el-select>
         <el-button
           icon="el-icon-plus"
           type="primary"
           style="margin-left: 10px"
-          :disabled="!SelectAttr" @click="AddSaleAttr">添加销售属性</el-button>
+          :disabled="!SelectAttr" @click="AddSaleAttr">添加销售属性
+        </el-button>
         <el-table style="width: 100%" border :data="SpuData.spuSaleAttrList">
           <el-table-column
             align="center"
@@ -100,7 +102,7 @@
       </el-form-item>
       <el-form-item>
         <el-button type="primary" round @click="AddOrUpdateSpu">保存</el-button>
-        <el-button @click="$emit('changeScene',0)" round>取消</el-button>
+        <el-button @click="cancelSubmit" round>取消</el-button>
       </el-form-item>
     </el-form>
   </div>
@@ -154,23 +156,44 @@ export default {
           // },
         ],
       },
-      SelectAttr:'',
+      SelectAttr: '',
       TradeMarkList: [],
       SpuImgList: [],
       SaleAttrList: []
     }
   },
   methods: {
-    AddSaleAttr(){
+    async addSpuData(category3Id) {
+      this.SpuData.category3Id = category3Id
+      let tradeMarkResult = await this.$API.spu.reqGetTradeMark()
+      if (tradeMarkResult.code == 200) {
+        this.TradeMarkList = tradeMarkResult.data
+      } else {
+        this.$message({
+          message: 'Spu信息请求失败！',
+          type: 'error'
+        })
+      }
+      let SaleAttrResult = await this.$API.spu.reqGetSaleAttrList()
+      if (SaleAttrResult.code == 200) {
+        this.SaleAttrList = SaleAttrResult.data
+      } else {
+        this.$message({
+          message: 'Spu信息请求失败！',
+          type: 'error'
+        })
+      }
+    },
+    AddSaleAttr() {
 
-      const[baseSaleAttrId,saleAttrName] = this.SelectAttr.split(':')
-      let newSaleAttr = {baseSaleAttrId , saleAttrName ,spuSaleAttrValueList:[] }
+      const [baseSaleAttrId, saleAttrName] = this.SelectAttr.split(':')
+      let newSaleAttr = {baseSaleAttrId, saleAttrName, spuSaleAttrValueList: []}
       this.SpuData.spuSaleAttrList.push(newSaleAttr)
       this.SelectAttr = ""
     },
 
-    HandlerSuccess(response, file, fileList){
-      if(response.code == 200){
+    HandlerSuccess(response, file, fileList) {
+      if (response.code == 200) {
         this.SpuImgList = fileList
       }
 
@@ -183,7 +206,7 @@ export default {
       this.dialogVisible = true;
     },
     //初始化spu数据
-    async initSpuData(row) {
+    async upDateSpuData(row) {
       //获取spu信息的接口
       let result = await this.$API.spu.reqGetSpuInfo(row.id)
       if (result.code == 200) {
@@ -227,92 +250,93 @@ export default {
         })
       }
     },
-    handleClose(tag,row) {
+    handleClose(tag, row) {
       row.spuSaleAttrValueList.splice(row.spuSaleAttrValueList.indexOf(tag), 1);
     },
 
     showInput(row) {
-      this.$set(row,'inputVisible',true)
-      this.$set(row,'inputValue','')
+      this.$set(row, 'inputVisible', true)
+      this.$set(row, 'inputValue', '')
       this.$nextTick(_ => {
         this.$refs.saveTagInput.$refs.input.focus();
       });
     },
 
     handleInputConfirm(row) {
-      if(row.inputValue.trim() == ''){
+      if (row.inputValue.trim() == '') {
         row.inputVisible = true;
         this.$message({
-          message:'属性值不能为空',
-          type:"error",
+          message: '属性值不能为空',
+          type: "error",
         })
         return
       }
       //属性值不能重复 重复为false 没重复为true
       //inputValue为el-tag采集的数据
       //let res = row.spuSaleAttrValueList.every(item => item.saleAttrValueName != inputValue)
-      let isRepat = row.spuSaleAttrValueList.some(item=>{
+      let isRepat = row.spuSaleAttrValueList.some(item => {
         //需要将row从数组里面判断的时候去除
         //row最新新增的属性值【数组的最后一项元素】
         //判断的时候，需要把已有的数组当中新增的这个属性值去除
-        if(row!==item){
-          return row.inputValue==item.saleAttrValueName;
+        if (row !== item) {
+          return row.inputValue == item.saleAttrValueName;
         }
       });
-      if(isRepat) {
+      if (isRepat) {
         this.$message({
-          message:'属性值不能相同',
-          type:"error",
+          message: '属性值不能相同',
+          type: "error",
         })
         return;
       }
-      const {baseSaleAttrId,inputValue} = row
-      let newSaleAttrValue = {baseSaleAttrId,saleAttrValueName:inputValue}
+      const {baseSaleAttrId, inputValue} = row
+      let newSaleAttrValue = {baseSaleAttrId, saleAttrValueName: inputValue}
       row.spuSaleAttrValueList.push(
         newSaleAttrValue
       )
       row.inputVisible = false;
       row.inputValue = '';
     },
-    delSaleAttr(row,$index){
-      this.SpuData.spuSaleAttrList.splice($index,1)
+    delSaleAttr(row, $index) {
+      this.SpuData.spuSaleAttrList.splice($index, 1)
     },
-    async AddOrUpdateSpu(){
+    async AddOrUpdateSpu() {
       this.SpuData.spuImageList = this.SpuImgList.map(item => {
-        return{
-          imgName:item.name,
-          imgUrl:(item.response && item.response.data) || item.url
+        return {
+          imgName: item.name,
+          imgUrl: (item.response && item.response.data) || item.url
         }
       })
-      const {category3Id ,description ,spuName,tmId,spuImageList,spuSaleAttrList} = this.SpuData
-      let NewSpu = {
-        category3Id,
-        description,
-        spuName,
-        tmId,
-        spuImageList,
-        spuSaleAttrList
-      }
-      let result = await this.$API.spu.reqAddOrUpdateSpu(NewSpu)
-      if(result.code == 200){
+      let result = await this.$API.spu.reqAddOrUpdateSpu(this.SpuData)
+      if (result.code == 200) {
         this.$message({
-          message:'保存成功！',
-          type:"success",
+          message: '保存成功！',
+          type: "success",
         })
       }
-      this.$emit('changeScene',0)
+      this.$emit('changeScene', {scene: 0, flag: this.SpuData.id ? '修改' : '添加'})
+      Object.assign(this._data, this.$options.data())
+    },
+    cancelSubmit() {
+      this.$emit('changeScene', {scene: 0, flag: ''})
+      //清理数据
+      //Object.assign:es6中新增的方法可以合并对象
+      //组件实例this._data,可以操作data当中响应式数据
+      //this.$options可以获取配置对象，配置对象的data函数执行，返回的响应式数据为空的
+      Object.assign(this._data, this.$options.data())
     }
 
   },
-  computed:{
-    unSelectSaleAttr(){
-       let result = this.SaleAttrList.filter(item => {
+  computed: {
+    unSelectSaleAttr() {
+      let result = this.SaleAttrList.filter(item => {
         return this.SpuData.spuSaleAttrList.every(item1 => {
-           return item.name != item1.saleAttrName
+          return item.name != item1.saleAttrName
         })
       })
       return result
-    }
+    },
+
   }
 }
 </script>

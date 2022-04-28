@@ -1,12 +1,14 @@
 <template>
   <div>
     <el-card class="box-card" style="margin-bottom: 30px">
-      <CategorySelect  @getCateGoryId="getCateGoryId" :show="scene != 0"></CategorySelect>
+      <CategorySelect @getCateGoryId="getCateGoryId" :show="scene != 0"></CategorySelect>
     </el-card>
     <el-card class="box-card" style="margin-bottom: 30px">
       <!-- 展示spu表结构-->
-      <div v-show="scene == 0" >
-        <el-button type="primary" icon="el-icon-plus" style="margin-bottom: 20px" :disabled="!category3Id" @click="AddSpu">添加SPU</el-button>
+      <div v-show="scene == 0">
+        <el-button type="primary" icon="el-icon-plus" style="margin-bottom: 20px" :disabled="!category3Id"
+                   @click="AddSpu">添加SPU
+        </el-button>
         <el-table style="width: 100%" border :data="SPUList">
           <el-table-column
             align="center"
@@ -75,15 +77,15 @@
           :pager-count="7"
           layout=" prev, pager, next, jumper, ->, sizes, total"
           :total=total
-          @current-change="handlerCurrentChange"
+          @current-change="getSPUList"
           @size-change="handlerSizeChange"
         />
       </div>
       <!--  添加修改spu -->
-        <spu-form v-show="scene == 1" @changeScene="changeScene" ref="spuForm"></spu-form>
+      <spu-form v-show="scene == 1" @changeScene="changeScene" ref="spuForm"></spu-form>
 
       <!--  添加sku -->
-        <sku-form v-show="scene == 2"></sku-form>
+      <sku-form v-show="scene == 2"></sku-form>
     </el-card>
   </div>
 </template>
@@ -91,26 +93,27 @@
 <script>
 import SpuForm from './SpuForm'
 import SkuForm from './SkuForm'
+
 export default {
   name: 'Spu',
-  components:{
+  components: {
     SpuForm,
     SkuForm
   },
-  data(){
-    return{
+  data() {
+    return {
       category1Id: '',
       category2Id: '',
       category3Id: '',
-      Show:true,
-      page:1,
-      limit:3,
-      total:0,
-      SPUList:[],
-      scene:0
+      Show: true,
+      page: 1,
+      limit: 3,
+      total: 0,
+      SPUList: [],
+      scene: 0
     }
   },
-  methods:{
+  methods: {
     getCateGoryId(cateGory) {
       if (cateGory.level == 1) {
         this.category1Id = cateGory.categoryId
@@ -126,38 +129,43 @@ export default {
         this.getSPUList()
       }
     },
-   async getSPUList(){
-      let {page,limit,category3Id} = this
-      let result = await this.$API.spu.reqSpuPageList(page , limit , category3Id)
-      if(result.code == 200){
+    async getSPUList(pages = 1) {
+      this.page = pages;
+      let {page, limit, category3Id} = this
+      let result = await this.$API.spu.reqSpuPageList(page, limit, category3Id)
+      if (result.code == 200) {
         this.total = result.data.total
         this.SPUList = result.data.records
-      }else {
+      } else {
         this.$message({
-          message:'SPU列表请求失败！',
-          type:"error"
+          message: 'SPU列表请求失败！',
+          type: "error"
         })
       }
-    },
-    handlerCurrentChange(pager) {
-      this.page = pager
-      this.getSPUList()
     },
     handlerSizeChange(limit) {
       this.limit = limit
       this.getSPUList()
     },
-    AddSpu(){
-      this.scene =  1
+    AddSpu() {
+      this.scene = 1
+      this.$refs.spuForm.addSpuData(this.category3Id)
     },
-    upDateSpu(row){
-      this.scene =  1
+    upDateSpu(row) {
+      this.scene = 1
       //点击更新触发子组件方法获取数据
-      this.$refs.spuForm.initSpuData(row)
+      this.$refs.spuForm.upDateSpuData(row)
     },
-    changeScene(change){
-      this.scene = change
-      this.getSPUList(this.page)
+    changeScene({scene,flag}) {
+      this.scene = scene
+      console.log(flag == '添加')
+      if(flag == '添加'){
+        this.getSPUList(1)
+      }else {
+        this.getSPUList(this.page)
+      }
+
+
     }
   }
 }

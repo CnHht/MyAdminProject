@@ -113,8 +113,8 @@
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
-        <el-button @click="cancelAddOrUpload" >取 消</el-button>
-        <el-button type="primary" @click="addOrUpdateTradeMark('ruleForm')" >确 定</el-button>
+        <el-button @click="cancelAddOrUpload">取 消</el-button>
+        <el-button type="primary" @click="addOrUpdateTradeMark('ruleForm')">确 定</el-button>
       </div>
     </el-dialog>
   </div>
@@ -139,18 +139,18 @@ export default {
       //对话框显示与隐藏
       dialogFormVisible: false,
       formLabelWidth: '120px',
-      tmForm:{
-        tmName:'',
-        logoUrl:''
+      tmForm: {
+        tmName: '',
+        logoUrl: ''
       },
       //表单验证规则
-      rules:{
+      rules: {
         tmName: [
-          { required: true, message: '请输入名称', trigger: 'blur' },
-          { min: 2, max: 10, message: '长度在 2 到 10 个字符', trigger: 'change' }
+          {required: true, message: '请输入名称', trigger: 'blur'},
+          {min: 2, max: 10, message: '长度在 2 到 10 个字符', trigger: 'change'}
         ],
         logoUrl: [
-          { required: true, message: '请上传正确的品牌图片' }
+          {required: true, message: '请上传正确的品牌图片'}
         ],
       },
     }
@@ -175,7 +175,7 @@ export default {
     },
     AddTradeMark() {
       this.dialogFormVisible = !this.dialogFormVisible
-      this.tmForm = {tmName: '',logoUrl: ''}
+      this.tmForm = {tmName: '', logoUrl: ''}
     },
     //上传图片的回调
     handleAvatarSuccess(res, file) {
@@ -193,23 +193,23 @@ export default {
       }
       return isJPG && isLt2M;
     },
-     addOrUpdateTradeMark(formName){
-      this.$refs[formName].validate(async(valid) => {
+    addOrUpdateTradeMark(formName) {
+      this.$refs[formName].validate(async (valid) => {
         if (valid) {
           this.dialogFormVisible = false
           let result = await this.$API.trademark.reqAddOrUpDateTradeMark(this.tmForm)
-          if(result.code == 200){
+          if (result.code == 200) {
             this.$message({
-              message:this.tmForm.id? '修改品牌成功':'添加品牌成功',
-              type:"success"
+              message: this.tmForm.id ? '修改品牌成功' : '添加品牌成功',
+              type: "success"
             })
             //添加或者修改品牌成功以后，需要再次获取品牌列表进行展示
             //如果添加品牌： 停留在第一页，修改品牌应该留在当前页面
-            this.getPageList(this.tmForm.id? this.page:1)
-          }else {
+            this.getPageList(this.tmForm.id ? this.page : 1)
+          } else {
             this.$message({
-              message:'请求失败',
-              type:"error"
+              message: '请求失败',
+              type: "error"
             })
           }
         } else {
@@ -219,19 +219,19 @@ export default {
       });
 
     },
-    cancelAddOrUpload(){
-        this.dialogFormVisible = false
-        this.$message({
-          dangerouslyUseHTMLString: true,
-          message: '<p style="font-size:48px">&#128517;</p>',
+    cancelAddOrUpload() {
+      this.dialogFormVisible = false
+      this.$message({
+        dangerouslyUseHTMLString: true,
+        message: '<p style="font-size:48px">&#128517;</p>',
 
-          type:"error",
-          center:true,
-          showClose:true
-        });
+        type: "error",
+        center: true,
+        showClose: true
+      });
 
     },
-    updateTradeMark(row){
+    updateTradeMark(row) {
       //row：当前用户选中这个品牌信息
       //将已有的品牌信息赋值给tmForm进行展示
       //将服务器返回品牌的信息，直接赋值给了tmForm进行展示。
@@ -240,7 +240,7 @@ export default {
       //this.tmForm = {...row}浅拷贝，不能直接操作数据
       this.tmForm = {...row}
     },
-    deleteTradeMark(row){
+    deleteTradeMark(row) {
       this.$confirm('此操作将永久删除, 是否继续?', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
@@ -266,7 +266,7 @@ export default {
 }
 </script>
 
-<style >
+<style>
 .avatar-uploader .el-upload {
   border: 1px dashed #d9d9d9;
   border-radius: 6px;

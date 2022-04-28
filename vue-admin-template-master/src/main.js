@@ -24,12 +24,12 @@ import '@/permission' // permission control
  * please remove it before going online ! ! !
  */
 if (process.env.NODE_ENV === 'production') {
-  const { mockXHR } = require('../mock')
+  const {mockXHR} = require('../mock')
   mockXHR()
 }
 
 // set ElementUI lang to EN
-Vue.use(ElementUI, { locale })
+Vue.use(ElementUI, {locale})
 // 如果想要中文版 element-ui，按如下方式声明
 // Vue.use(ElementUI)
 
@@ -37,13 +37,16 @@ Vue.config.productionTip = false
 
 //引入相关api接口 使得全局可以使用
 import API from '@/api'
+
 Vue.prototype.$API = API
 
 //注册全局组件
 import CategorySelect from '@/components/CategorySelect'
-Vue.component(CategorySelect.name,CategorySelect)
+
+Vue.component(CategorySelect.name, CategorySelect)
 import HintButton from '@/components/HintButton'
-Vue.component(HintButton.name,HintButton)
+
+Vue.component(HintButton.name, HintButton)
 new Vue({
   el: '#app',
   router,
