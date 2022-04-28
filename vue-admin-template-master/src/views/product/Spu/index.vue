@@ -1,7 +1,7 @@
 <template>
   <div>
     <el-card class="box-card" style="margin-bottom: 30px">
-      <CategorySelect  @getCateGoryId="getCateGoryId" :show="!Show"></CategorySelect>
+      <CategorySelect  @getCateGoryId="getCateGoryId" :show="scene != 0"></CategorySelect>
     </el-card>
     <el-card class="box-card" style="margin-bottom: 30px">
       <!-- 展示spu表结构-->
@@ -157,6 +157,7 @@ export default {
     },
     changeScene(change){
       this.scene = change
+      this.getSPUList(this.page)
     }
   }
 }

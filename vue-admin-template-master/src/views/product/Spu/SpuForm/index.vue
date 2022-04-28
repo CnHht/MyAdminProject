@@ -64,7 +64,7 @@
                 v-for="tag in row.spuSaleAttrValueList"
                 closable
                 :disable-transitions="false"
-                @close="handleClose(tag)">
+                @close="handleClose(tag,row)">
                 {{ tag.saleAttrValueName }}
               </el-tag>
               <el-input
@@ -74,10 +74,10 @@
                 ref="saveTagInput"
                 size="small"
                 @keyup.enter.native="handleInputConfirm"
-                @blur="handleInputConfirm"
+                @blur="handleInputConfirm(row)"
               >
               </el-input>
-              <el-button v-else class="button-new-tag" size="small" @click="showInput">+</el-button>
+              <el-button v-else class="button-new-tag" size="small" @click="showInput(row)">+</el-button>
             </template>
           </el-table-column>
           <el-table-column
@@ -91,6 +91,7 @@
                 round
                 icon="el-icon-delete"
                 title="删除spu"
+                @click="delSaleAttr(row,$index)"
               >
               </HintButton>
             </template>
@@ -98,7 +99,7 @@
         </el-table>
       </el-form-item>
       <el-form-item>
-        <el-button type="primary" round>保存</el-button>
+        <el-button type="primary" round @click="AddOrUpdateSpu">保存</el-button>
         <el-button @click="$emit('changeScene',0)" round>取消</el-button>
       </el-form-item>
     </el-form>
@@ -117,7 +118,7 @@ export default {
       dialogVisible: false,
       SpuData: {
         //三级分类的id
-        category3Id: 0,
+        category3Id: 0, //category3Id description spuName tmId
         //描述
         description: "",
         //spu名称
@@ -161,9 +162,11 @@ export default {
   },
   methods: {
     AddSaleAttr(){
+
       const[baseSaleAttrId,saleAttrName] = this.SelectAttr.split(':')
       let newSaleAttr = {baseSaleAttrId , saleAttrName ,spuSaleAttrValueList:[] }
       this.SpuData.spuSaleAttrList.push(newSaleAttr)
+      this.SelectAttr = ""
     },
 
     HandlerSuccess(response, file, fileList){
@@ -224,24 +227,80 @@ export default {
         })
       }
     },
-    handleClose(tag) {
-      this.dynamicTags.splice(this.dynamicTags.indexOf(tag), 1);
+    handleClose(tag,row) {
+      row.spuSaleAttrValueList.splice(row.spuSaleAttrValueList.indexOf(tag), 1);
     },
 
-    showInput() {
-      this.inputVisible = true;
+    showInput(row) {
+      this.$set(row,'inputVisible',true)
+      this.$set(row,'inputValue','')
       this.$nextTick(_ => {
         this.$refs.saveTagInput.$refs.input.focus();
       });
     },
 
-    handleInputConfirm() {
-      let inputValue = this.inputValue;
-      if (inputValue) {
-        this.dynamicTags.push(inputValue);
+    handleInputConfirm(row) {
+      if(row.inputValue.trim() == ''){
+        row.inputVisible = true;
+        this.$message({
+          message:'属性值不能为空',
+          type:"error",
+        })
+        return
       }
-      this.inputVisible = false;
-      this.inputValue = '';
+      //属性值不能重复 重复为false 没重复为true
+      //inputValue为el-tag采集的数据
+      //let res = row.spuSaleAttrValueList.every(item => item.saleAttrValueName != inputValue)
+      let isRepat = row.spuSaleAttrValueList.some(item=>{
+        //需要将row从数组里面判断的时候去除
+        //row最新新增的属性值【数组的最后一项元素】
+        //判断的时候，需要把已有的数组当中新增的这个属性值去除
+        if(row!==item){
+          return row.inputValue==item.saleAttrValueName;
+        }
+      });
+      if(isRepat) {
+        this.$message({
+          message:'属性值不能相同',
+          type:"error",
+        })
+        return;
+      }
+      const {baseSaleAttrId,inputValue} = row
+      let newSaleAttrValue = {baseSaleAttrId,saleAttrValueName:inputValue}
+      row.spuSaleAttrValueList.push(
+        newSaleAttrValue
+      )
+      row.inputVisible = false;
+      row.inputValue = '';
+    },
+    delSaleAttr(row,$index){
+      this.SpuData.spuSaleAttrList.splice($index,1)
+    },
+    async AddOrUpdateSpu(){
+      this.SpuData.spuImageList = this.SpuImgList.map(item => {
+        return{
+          imgName:item.name,
+          imgUrl:(item.response && item.response.data) || item.url
+        }
+      })
+      const {category3Id ,description ,spuName,tmId,spuImageList,spuSaleAttrList} = this.SpuData
+      let NewSpu = {
+        category3Id,
+        description,
+        spuName,
+        tmId,
+        spuImageList,
+        spuSaleAttrList
+      }
+      let result = await this.$API.spu.reqAddOrUpdateSpu(NewSpu)
+      if(result.code == 200){
+        this.$message({
+          message:'保存成功！',
+          type:"success",
+        })
+      }
+      this.$emit('changeScene',0)
     }
 
   },

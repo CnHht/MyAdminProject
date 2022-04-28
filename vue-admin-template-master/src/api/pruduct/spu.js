@@ -31,3 +31,9 @@ export const reqGetSaleAttrList = () => request({
   method:'get'
 })
 
+//修改或者添加Spu的接口
+
+export const reqAddOrUpdateSpu = (spuInfo) => {
+  if(spuInfo.id) return request({ url: '/admin/product/updateSpuInfo', method: 'post', data: spuInfo})
+  else return request({ url: '/admin/product/saveSpuInfo', method: 'post', data: spuInfo });
+}
