@@ -56,6 +56,7 @@
                 type="info"
                 icon="el-icon-info"
                 title="查看实例"
+                @click="HandlerSkuDetail(row)"
               >
               </HintButton>
               <el-popconfirm
@@ -93,8 +94,20 @@
       <spu-form v-show="scene == 1" @changeScene="changeScene" ref="spuForm"></spu-form>
 
       <!--  添加sku -->
-      <sku-form v-show="scene == 2" ref="skuForm"></sku-form>
+      <sku-form v-show="scene == 2" ref="skuForm" @changeScene="changeScene"></sku-form>
     </el-card>
+    <el-dialog :title="`${spu.spuName}的sku列表`" :visible.sync="dialogTableVisible" :before-close="closeSkuDetail">
+      <el-table style="width: 100%" border :data="skuList"  v-loading="loading" >
+        <el-table-column label="名称" width="width" prop="skuName"></el-table-column>
+        <el-table-column label="价格" width="width" prop="price"></el-table-column>
+        <el-table-column label="重量" width="width" prop="weight"></el-table-column>
+        <el-table-column label="默认图片" width="width">
+          <template slot-scope="{row,$index}">
+            <img :src="row.skuDefaultImg" style="width:100px;height:100px">
+          </template>
+        </el-table-column>
+      </el-table>
+    </el-dialog>
   </div>
 </template>
 
@@ -118,10 +131,30 @@ export default {
       limit: 3,
       total: 0,
       SPUList: [],
-      scene: 0
+      scene: 0,
+      dialogTableVisible: false,
+      skuList:[],
+      spu:{},
+      loading:true
     }
   },
   methods: {
+    closeSkuDetail(done){
+      this.loading =true
+      this.skuList = []
+      done()
+    },
+    async HandlerSkuDetail(row){
+      this.dialogTableVisible = true
+      this.spu = row
+      let result = await this.$API.spu.reqSkuList(row.id)
+      console.log(result)
+      if(result.code == 200){
+        this.skuList = result.data
+        this.loading = false
+      }
+
+    },
     getCateGoryId(cateGory) {
       if (cateGory.level == 1) {
         this.category1Id = cateGory.categoryId
