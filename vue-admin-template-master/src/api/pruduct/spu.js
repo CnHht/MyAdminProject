@@ -37,3 +37,12 @@ export const reqAddOrUpdateSpu = (spuInfo) => {
   if (spuInfo.id) return request({url: '/admin/product/updateSpuInfo', method: 'post', data: spuInfo})
   else return request({url: '/admin/product/saveSpuInfo', method: 'post', data: spuInfo});
 }
+
+//删除Spu的接口 DELETE /admin/product/deleteSpu/{spuId}
+export const reqDeleteSpu = (spuId) => request({
+  url:`/admin/product/deleteSpu/${spuId}`,
+  method:'delete'
+})
+//获取平台属性的数据
+//GET /admin/product/attrInfoList/{category1Id}/{category2Id}/{category3Id}
+export const reqAttrInfoList = (category1Id,category2Id,category3Id)=>request({url:`/admin/product/attrInfoList/${category1Id}/${category2Id}/${category3Id}`,method:'get'});

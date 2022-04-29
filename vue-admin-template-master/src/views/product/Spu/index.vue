@@ -37,6 +37,7 @@
                 round
                 icon="el-icon-plus"
                 title="添加sku"
+                @click="AddSku(row)"
               >
               </HintButton>
 
@@ -57,14 +58,21 @@
                 title="查看实例"
               >
               </HintButton>
-              <HintButton
-                size="mini"
-                type="danger"
-                round
-                icon="el-icon-delete"
-                title="删除spu"
+              <el-popconfirm
+                title="这是一段内容确定删除吗？"
+                @onConfirm="DeleteSpu(row)"
               >
-              </HintButton>
+                <HintButton
+                  size="mini"
+                  type="danger"
+                  round
+                  icon="el-icon-delete"
+                  title="删除spu"
+                  slot="reference"
+                >
+                </HintButton>
+              </el-popconfirm>
+
             </template>
           </el-table-column>
         </el-table>
@@ -85,7 +93,7 @@
       <spu-form v-show="scene == 1" @changeScene="changeScene" ref="spuForm"></spu-form>
 
       <!--  添加sku -->
-      <sku-form v-show="scene == 2"></sku-form>
+      <sku-form v-show="scene == 2" ref="skuForm"></sku-form>
     </el-card>
   </div>
 </template>
@@ -156,17 +164,41 @@ export default {
       //点击更新触发子组件方法获取数据
       this.$refs.spuForm.upDateSpuData(row)
     },
-    changeScene({scene,flag}) {
+    changeScene({scene, flag}) {
       this.scene = scene
       console.log(flag == '添加')
-      if(flag == '添加'){
+      if (flag == '添加') {
         this.getSPUList(1)
-      }else {
+      } else {
         this.getSPUList(this.page)
       }
 
 
+    },
+    async DeleteSpu(row) {
+      let result = await this.$API.spu.reqDeleteSpu(row.id);
+      if (result.code == 200) {
+        this.$message({
+          message: '删除成功！',
+          type: "success"
+        })
+        if (this.SPUList.length > 1) {
+          this.getSPUList(this.page)
+        } else {
+          this.getSPUList(this.page - 1)
+        }
+      } else {
+        this.$message({
+          message: '删除失败！',
+          type: "error"
+        })
+      }
+    },
+    AddSku(row){
+      this.scene = 2
+      this.$refs.skuForm.getData(this.category1Id,this.category2Id,row)
     }
+
   }
 }
 </script>
