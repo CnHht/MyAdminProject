@@ -10,46 +10,46 @@
                    @click="AddSpu">添加SPU
         </el-button>
         <el-table style="width: 100%" border :data="SPUList">
-          <el-table-column
-            align="center"
-            label="序号"
-            width="80px"
-            type="index"
-          ></el-table-column>
-          <el-table-column
-            align="center"
-            label="SPU名称"
-            prop="spuName"
-          ></el-table-column>
-          <el-table-column
-            label="SPU叙述"
-            prop="description"
-          >
-          </el-table-column>
-          <el-table-column
-            align="center"
-            label="操作"
-          >
-            <template slot-scope="{row,$index}">
-              <HintButton
-                size="mini"
-                type="success"
-                round
-                icon="el-icon-plus"
-                title="添加sku"
-                @click="AddSku(row)"
-              >
-              </HintButton>
+                <el-table-column
+                  align="center"
+                  label="序号"
+                  width="80px"
+                  type="index"
+                ></el-table-column>
+                <el-table-column
+                  align="center"
+                  label="SPU名称"
+                  prop="spuName"
+                ></el-table-column>
+                <el-table-column
+                  label="SPU叙述"
+                  prop="description"
+                >
+                </el-table-column>
+                <el-table-column
+                  align="center"
+                  label="操作"
+                >
+                  <template slot-scope="{row,$index}">
+                    <HintButton
+                      size="mini"
+                      type="success"
+                      round
+                      icon="el-icon-plus"
+                      title="添加sku"
+                      @click="AddSku(row)"
+                    >
+                    </HintButton>
 
-              <HintButton
-                size="mini"
-                type="warning"
-                round
-                icon="el-icon-edit"
-                title="修改spu"
-                @click="upDateSpu(row)"
-              >
-              </HintButton>
+                    <HintButton
+                      size="mini"
+                      type="warning"
+                      round
+                      icon="el-icon-edit"
+                      title="修改spu"
+                      @click="upDateSpu(row)"
+                    >
+                    </HintButton>
               <HintButton
                 size="mini"
                 round
